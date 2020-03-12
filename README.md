@@ -1,4 +1,4 @@
-# A Simple HTTP WevServer
+# A Simple HTTP WebServer
 ## Introduction
 本项目为基于 epoll 的多线程Web服务器，解析了 Get 请求，可处理静态资源请求，支持 HTTP 长连接及超时断开。
 测试页：
