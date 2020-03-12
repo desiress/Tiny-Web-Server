@@ -3,20 +3,24 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/epoll.h>
 #include <sys/socket.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <dirent.h>
 
 #include "http.h"
-#include "socket.h"
 #include "data.h"
+#include "epoll.h"
+
+extern int g_efd; 
 
 void *read_and_respond(void *arg)
-//void read_and_respond(int cfd, int epfd)
 {
-	int cfd = *(int*)arg;
-	int epfd = *(int*)(arg+1);
+	struct myevent_s *ev = (struct myevent_s *)arg;
+	
+	int cfd = ev->fd;
+	
 	char line[1024] = {0};
     // 读请求行
     int len = get_line(cfd, line, sizeof(line));
@@ -25,19 +29,20 @@ void *read_and_respond(void *arg)
         printf("客户端断开了连接...\n");
         // 关闭套接字, cfd从epoll上del
         //disconnect(cfd, epfd);
-        close(cfd);         
+        close(cfd); 
+        eventdel(g_efd, ev);        //将该节点从红黑树上摘除        
     }
     else
     {
-        printf("请求行数据: %s", line);
-        printf("============= 请求头 ============\n");
+        printf("Request Line: %s\n", line);
+        printf("============= Header: ============\n");
         // 还有数据没读完
         // 继续读
         while(len)
         {
             char buf[1024] = {0};
             len = get_line(cfd, buf, sizeof(buf));
-            printf("-----: %s", buf);
+            printf("-----: %s\n", buf);
         }
         printf("============= The End ============\n");
     }
@@ -50,6 +55,8 @@ void *read_and_respond(void *arg)
         // 关闭套接字, cfd从epoll上del
         //disconnect(cfd, epfd);     
         close(cfd);    
+        eventset(ev, cfd, do_request, ev);                     //将该fd的 回调函数改为 recvdata
+        eventadd(g_efd, EPOLLIN | EPOLLET, ev);                       //从新添加到红黑树上， 设为监听读事件
     }
 }
 
@@ -151,8 +158,8 @@ void send_dir(int cfd, const char* dirname)
     // 拼一个html页面<table></table>
     char buf[4094] = {0};
 
-    sprintf(buf, "<html><head><title>目录名: %s</title></head>", dirname);
-    sprintf(buf+strlen(buf), "<body><h1>当前目录: %s</h1><table>", dirname);
+    sprintf(buf, "<html><head><title>Content: %s</title></head>", dirname);
+    sprintf(buf+strlen(buf), "<body><h1>Now: %s</h1><table>", dirname);
 
     char enstr[1024] = {0};
     char path[1024] = {0};
