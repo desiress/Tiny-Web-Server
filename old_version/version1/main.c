@@ -1,7 +1,13 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include "epoll_server.h"
+#include <errno.h>
+#include <sys/epoll.h>
+
+#include "socket.h"
+#include "http.h"
+
+#define MAXSIZE 1024
 
 int main(int argc, const char* argv[])
 {
@@ -11,9 +17,9 @@ int main(int argc, const char* argv[])
         exit(1);
     }
 
-    // ç«¯å£
+    // ¶Ë¿Ú
     int port = atoi(argv[1]);
-    // ä¿®æ”¹è¿›ç¨‹çš„å·¥ä½œç›®å½•, æ–¹ä¾¿åç»­æ“ä½œ
+    // ĞŞ¸Ä½ø³ÌµÄ¹¤×÷Ä¿Â¼, ·½±ãºóĞø²Ù×÷
     int ret = chdir(argv[2]);
     if(ret == -1)
     {
@@ -21,8 +27,48 @@ int main(int argc, const char* argv[])
         exit(1);
     }
     
-    // å¯åŠ¨epollæ¨¡å‹ 
-    epoll_run(port);
+    int epfd = epoll_create(MAXSIZE);
+	if(epfd == -1)
+    {
+        perror("epoll_create error");
+        exit(1);
+    }
+    
+    int lfd = lfd_init(port, epfd);
+    
+    struct epoll_event all[MAXSIZE];
+    while(1)
+    {
+    	int ret = epoll_wait(epfd, all, MAXSIZE, -1);
+        if(ret == -1)
+        {
+            perror("epoll_wait error");
+            exit(1);
+        }
+      
+         // ±éÀú·¢Éú±ä»¯µÄ½Úµã
+        for(int i=0; i<ret; ++i)
+        {
+            // Ö»´¦Àí¶ÁÊÂ¼ş, ÆäËûÊÂ¼şÄ¬ÈÏ²»´¦Àí
+            struct epoll_event *pev = &all[i];
+            if(!(pev->events & EPOLLIN))
+            {
+                // ²»ÊÇ¶ÁÊÂ¼ş
+                continue;
+            }
 
+            if(pev->data.fd == lfd)
+            {
+                // ½ÓÊÜÁ¬½ÓÇëÇó
+                accept_connection(lfd, epfd);
+            }
+            else
+            {
+                // ¶ÁÊı¾İ
+                read_and_respond(pev->data.fd, epfd);
+            }
+        }
+    }
+ 
     return 0;
 }

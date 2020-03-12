@@ -12,11 +12,8 @@
 #include "socket.h"
 #include "data.h"
 
-void *read_and_respond(void *arg)
-//void read_and_respond(int cfd, int epfd)
+void read_and_respond(int cfd, int epfd)
 {
-	int cfd = *(int*)arg;
-	int epfd = *(int*)(arg+1);
 	char line[1024] = {0};
     // 读请求行
     int len = get_line(cfd, line, sizeof(line));
@@ -24,8 +21,7 @@ void *read_and_respond(void *arg)
     {
         printf("客户端断开了连接...\n");
         // 关闭套接字, cfd从epoll上del
-        //disconnect(cfd, epfd);
-        close(cfd);         
+        disconnect(cfd, epfd);         
     }
     else
     {
@@ -48,9 +44,9 @@ void *read_and_respond(void *arg)
         // 处理http请求
         handle_request(line, cfd);
         // 关闭套接字, cfd从epoll上del
-        //disconnect(cfd, epfd);     
-        close(cfd);    
+        disconnect(cfd, epfd);         
     }
+    
 }
 
 void handle_request(const char* request, int cfd)
