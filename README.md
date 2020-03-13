@@ -41,5 +41,5 @@ webserver [port] [file_path(should begin with '/')]
 
 ## 代码统计
    
-![](https://github.com/desiress/WebServer/blob/master/docs/webbench%20test.png)
+![](https://github.com/desiress/WebServer/blob/master/docs/%E4%BB%A3%E7%A0%81%E7%BB%9F%E8%AE%A1.png)
 
