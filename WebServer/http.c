@@ -15,7 +15,7 @@
 
 extern int g_efd; 
 
-void *read_and_respond(void *arg)
+void read_and_respond(void *arg)
 {
 	struct myevent_s *ev = (struct myevent_s *)arg;
 	
@@ -28,23 +28,22 @@ void *read_and_respond(void *arg)
     {
         printf("客户端断开了连接...\n");
         // 关闭套接字, cfd从epoll上del
-        //disconnect(cfd, epfd);
         close(cfd); 
         eventdel(g_efd, ev);        //将该节点从红黑树上摘除        
     }
     else
     {
         printf("Request Line: %s\n", line);
-        printf("============= Header: ============\n");
+//        printf("============= Header: ============\n");
         // 还有数据没读完
         // 继续读
         while(len)
         {
             char buf[1024] = {0};
             len = get_line(cfd, buf, sizeof(buf));
-            printf("-----: %s\n", buf);
+//            printf("-----: %s\n", buf);
         }
-        printf("============= The End ============\n");
+//        printf("============= The End ============\n");
     }
     // 请求行: get /xxx http/1.1
     // 判断是不是get请求
@@ -53,10 +52,8 @@ void *read_and_respond(void *arg)
         // 处理http请求
         handle_request(line, cfd);
         // 关闭套接字, cfd从epoll上del
-        //disconnect(cfd, epfd);     
-        close(cfd);    
-        eventset(ev, cfd, do_request, ev);                     //将该fd的 回调函数改为 recvdata
-        eventadd(g_efd, EPOLLIN | EPOLLET, ev);                       //从新添加到红黑树上， 设为监听读事件
+   		close(cfd);
+   		eventdel(cfd,ev);
     }
 }
 
@@ -173,7 +170,7 @@ void send_dir(int cfd, const char* dirname)
 
         // 拼接文件的完整路径
         sprintf(path, "%s/%s", dirname, name);
-        printf("path = %s ===================\n", path);
+//        printf("path = %s ===================\n", path);
         struct stat st;
         stat(path, &st);
 

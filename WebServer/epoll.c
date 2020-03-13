@@ -10,19 +10,17 @@
 #include <time.h>
 
 #include "epoll.h"
-#include "threadpool.h"
 #include "http.h"
 
 
-threadpool_t *thp;
+
 int g_efd;                                                  //全局变量, 保存epoll_create返回的文件描述符
 struct myevent_s g_events[MAX_EVENTS+1];                    //自定义结构体类型数组. +1-->listen fd
 
 void run(unsigned short port)
 {
 
-	thp = threadpool_create(3,100,100);/*创建线程池，池里最小3个线程，最大100，队列最大100*/
-    printf("pool inited\n");
+
 
     g_efd = epoll_create(MAX_EVENTS+1);                 //创建红黑树,返回给全局 g_efd 
     if (g_efd <= 0)
@@ -135,7 +133,7 @@ void eventdel(int efd, struct myevent_s *ev)
 
 void do_request(int fd, int events, void *arg)
 {
-	threadpool_add(thp, read_and_respond, arg);     /* 向线程池中添加任务 */
+	read_and_respond(arg);    /* 向线程池中添加任务 */
 	return ;
 }
 
