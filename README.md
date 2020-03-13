@@ -31,4 +31,4 @@ webserver [port] [file_path(should begin with '/')]
 ## Performance Test
 采用 HTTP 压力测试工具 WebBench 进行测试
 模拟 1000 个客户端进程，测试时间为 60s
-![](https://github.com/guodongxiaren/ImageCache/raw/master/Logo/foryou.gif)
+![](https://github.com/desiress/WebServer/blob/master/docs/webbench%20test.png)
