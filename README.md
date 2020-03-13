@@ -1,20 +1,16 @@
 # A Simple HTTP WebServer
 ## Introduction
-本项目为基于 epoll 的多线程Web服务器，解析了 Get 请求，可处理静态资源请求，支持 HTTP 长连接及超时断开。  
+本项目为基于 epoll 的Web服务器，解析了 Get 请求，可处理静态资源请求，支持超时断开。  
 测试页：http://114.116.240.106/demo.html
 ## Envoirment
 * 操作系统：Ubuntu 16.04
 * 编译器：gcc 5.4.0
 * 工程构建：make
 * 压测工具：webbench
-## Build
-```
-git clone https://github.com/desiress/WebServer.git
-cd Webserver
-make
-```
 ## Usage
 ```
+cd Webserver
+make
 webserver [port] [file_path(should begin with '/')]
 
 例：webserver 80 /root/Docu
