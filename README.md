@@ -39,3 +39,7 @@ webserver [port] [file_path(should begin with '/')]
 * 如果要改用多线程实现，那么C++11的智能指针可以帮助实现线程安全。
 * HTTP1.1 默认支持长链接，接下来会支持长链接模式。
 
+## 代码统计
+   
+![](https://github.com/desiress/WebServer/blob/master/docs/webbench%20test.png)
+
