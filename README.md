@@ -29,6 +29,7 @@ webserver [port] [file_path(should begin with '/')]
 * 非阻塞IO
 
 ## Performance Test
-采用 HTTP 压力测试工具 WebBench 进行测试
-模拟 1000 个客户端进程，测试时间为 60s
+* 采用 HTTP 压力测试工具 WebBench 进行测试  
+* 模拟 1000 个客户端进程，测试时间为 60s  
+    
 ![](https://github.com/desiress/WebServer/blob/master/docs/webbench%20test.png)
