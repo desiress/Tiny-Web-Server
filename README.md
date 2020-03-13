@@ -1,7 +1,7 @@
 # A Simple HTTP WebServer
 ## Introduction
 本项目为基于 epoll 的多线程Web服务器，解析了 Get 请求，可处理静态资源请求，支持 HTTP 长连接及超时断开。  
-测试页：
+测试页：http://114.116.240.106/demo.html
 ## Envoirment
 * 操作系统：Ubuntu 16.04
 * 编译器：gcc 5.4.0
