@@ -25,7 +25,7 @@ webserver [port] [file_path(should begin with '/')]
 ```
 ## 技术要点
 * 基于 epoll 的 IO 复用机制
-* 采用epoll的边沿触发（ET）模式
+* 采用epoll的边缘触发（ET）模式
 * 非阻塞IO
 
 ## 性能测试
