@@ -3,17 +3,24 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/epoll.h>
 #include <sys/socket.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <dirent.h>
 
 #include "http.h"
-#include "socket.h"
 #include "data.h"
+#include "epoll.h"
 
-void read_and_respond(int cfd, int epfd)
+extern int g_efd; 
+
+void read_and_respond(void *arg)
 {
+	struct myevent_s *ev = (struct myevent_s *)arg;
+	
+	int cfd = ev->fd;
+	
 	char line[1024] = {0};
     // 读请求行
     int len = get_line(cfd, line, sizeof(line));
@@ -21,21 +28,22 @@ void read_and_respond(int cfd, int epfd)
     {
         printf("客户端断开了连接...\n");
         // 关闭套接字, cfd从epoll上del
-        disconnect(cfd, epfd);         
+        close(cfd); 
+        eventdel(g_efd, ev);        //将该节点从红黑树上摘除        
     }
     else
     {
-        printf("请求行数据: %s", line);
-        printf("============= 请求头 ============\n");
+        printf("Request Line: %s\n", line);
+//        printf("============= Header: ============\n");
         // 还有数据没读完
         // 继续读
         while(len)
         {
             char buf[1024] = {0};
             len = get_line(cfd, buf, sizeof(buf));
-            printf("-----: %s", buf);
+//            printf("-----: %s\n", buf);
         }
-        printf("============= The End ============\n");
+//        printf("============= The End ============\n");
     }
     // 请求行: get /xxx http/1.1
     // 判断是不是get请求
@@ -44,9 +52,9 @@ void read_and_respond(int cfd, int epfd)
         // 处理http请求
         handle_request(line, cfd);
         // 关闭套接字, cfd从epoll上del
-        disconnect(cfd, epfd);         
+   		close(cfd);
+   		eventdel(cfd,ev);
     }
-    
 }
 
 void handle_request(const char* request, int cfd)
@@ -147,8 +155,8 @@ void send_dir(int cfd, const char* dirname)
     // 拼一个html页面<table></table>
     char buf[4094] = {0};
 
-    sprintf(buf, "<html><head><title>目录名: %s</title></head>", dirname);
-    sprintf(buf+strlen(buf), "<body><h1>当前目录: %s</h1><table>", dirname);
+    sprintf(buf, "<html><head><title>Content: %s</title></head>", dirname);
+    sprintf(buf+strlen(buf), "<body><h1>Now: %s</h1><table>", dirname);
 
     char enstr[1024] = {0};
     char path[1024] = {0};
@@ -162,7 +170,7 @@ void send_dir(int cfd, const char* dirname)
 
         // 拼接文件的完整路径
         sprintf(path, "%s/%s", dirname, name);
-        printf("path = %s ===================\n", path);
+//        printf("path = %s ===================\n", path);
         struct stat st;
         stat(path, &st);
 

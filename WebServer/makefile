@@ -1,10 +1,6 @@
-Src=$(wildcard *.c)
-Obj=$(patsubst %.c,%.o,$(Src))
-webserver:$(Obj)
-	gcc -o webserver $(Obj) -lpthread
 
-%.o:%.c
-	gcc -c $< -o $@
+webserver: main.cpp http_conn.cpp http_conn.h locker.h threadpool.h
+	g++ -o webserver main.cpp http_conn.cpp http_conn.h locker.h threadpool.h -lpthread
 
 clean:
 	rm *.o webserver
