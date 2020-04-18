@@ -1,6 +1,6 @@
 # A Simple HTTP WebServer
 ## 项目简介
-本项目为基于 epoll 的Web服务器，解析了 Get 请求，可处理静态资源请求，支持超时断开。  
+本项目为 C++ 编写的基于 epoll 的多线程 web 服务器，实现了 HTTP 的解析和 Get 方法请求，支持静态资源访问。
 测试页：http://114.116.240.106/demo.html
 
 ## 项目目的
@@ -8,7 +8,7 @@
 
 ## 开发环境
 * 操作系统：Ubuntu 16.04
-* 编译器：gcc 5.4.0
+* 编译器：g++ 4.8
 * 工程构建：make
 * 压测工具：webbench
 
@@ -24,9 +24,9 @@ webserver [port] [file_path(should begin with '/')]
 表示开启80端口 浏览器所请求资源的根目录为/root/Docu
 ```
 ## 技术要点
-* 基于 epoll 的 IO 复用机制
-* 采用epoll的边缘触发（ET）模式
-* 非阻塞IO
+* 基于 epoll 的 IO 复用机制，采用边缘触发（ET）模式，配合非阻塞I/O，解决了高并发下的 socket 处理问题。
+* 使用多线程充分利用多核 CPU，并使用线程池避免线程频繁创建销毁的开销。
+* 采用同步 I/O 模拟 proactor 模式处理事件，主线程接收请求报文，然后将任务插入请求队列，由工作线程从请求队列中获取任务。
 
 ## 性能测试
 * 采用 HTTP 压力测试工具 WebBench 进行测试  
@@ -35,11 +35,6 @@ webserver [port] [file_path(should begin with '/')]
 ![](https://github.com/desiress/WebServer/blob/master/docs/webbench%20test.png)
 
 ## 改进提升
-* 目前仅用单线程实现，如果改用线程池实现，则性能会进一步提升。
-* 如果要改用多线程实现，那么C++11的智能指针可以帮助实现线程安全。
-* HTTP1.1 默认支持长链接，接下来会支持长链接模式。
-
-## 代码统计
-   
-![](https://github.com/desiress/WebServer/blob/master/docs/%E4%BB%A3%E7%A0%81%E7%BB%9F%E8%AE%A1.png)
-
+* 实现定时器功能，定时剔除不活跃连接。
+* 为减少内存泄漏的可能，应使用智能指针等 RAII 机制。
+* 添加日志系统。
